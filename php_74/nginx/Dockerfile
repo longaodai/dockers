@@ -1,41 +1,62 @@
-FROM centos:centos7
+FROM alpine:3.13
 
-MAINTAINER LONGAODAI
+RUN apk update
+
+# install tool, nginx, php extension
+RUN apk add --no-cache \
+  git \
+  curl \
+  nginx \
+  supervisor
+
+RUN apk add --no-cache php7
+
+RUN apk add --no-cache \
+  php7-fpm \
+  php7-cli \
+  php7-ctype \
+  php7-curl \
+  php7-dom \
+  php7-fileinfo \
+  php7-gd \
+  php7-intl \
+  php7-mbstring \
+  php7-mysqli \
+  php7-opcache \
+  php7-openssl \
+  php7-phar \
+  php7-session \
+  php7-tokenizer \
+  php7-xml \
+  php7-xmlreader \
+  php7-xmlwriter \
+  php7-json \
+  php7-pdo \
+  php7-pdo_mysql \
+  php7-sqlite3 \
+  php7-zip \
+  php7-xdebug \
+  php7-pdo_sqlite \
+  php7-bcmath \
+  php7-redis
+
+# install composer
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+    && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+    && php -r "unlink('composer-setup.php');"
 
 # copy source app
 COPY . /var/www/app
-
-RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
- && rpm -Uvh https://rpms.remirepo.net/enterprise/remi-release-7.rpm
-
-# normal updates
-#RUN yum -y update
-
-# install php 7.3
-RUN yum -y install php74 php74-fpm php74-php php74-php-opcache php74-php-bcmath php74-php-cli php74-php-common php74-php-gd php74-php-intl php74-php-json php74-php-mbstring php74-php-pdo php74-php-pdo-dblib php74-php-pear php74-php-pecl-mcrypt php74-php-xmlrpc php74-php-xml php74-php-mysql php74-php-soap php74-php-pecl-zip php74-php-pecl-mongodb php74-php-pecl-xdebug php74-php-pecl-yaml php74-php-redis
-
-# install nginx
-RUN yum -y install nginx openssl php-fpm
-
-# tools
-RUN yum -y install epel-release iproute at curl crontabs git
-
-# pagespeed
-RUN yum clean all \
- && php74 -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
- && php74 composer-setup.php --install-dir=bin --filename=composer --version=1.4.3 \
- && php74 -r "unlink('composer-setup.php');" \
- && rm -rf /etc/localtime \
- && ln -s /usr/share/zoneinfo/Europe/Berlin /etc/localtime \
- && ln -s /bin/php74 /bin/php
-
-EXPOSE 80
-
 WORKDIR /var/www/app
 
-ADD conf.d/default.conf /etc/nginx/conf.d/default.conf
+# copy config for nginx, supervisord
+COPY /docker/conf.d/default.conf /etc/nginx/http.d/default.conf
+COPY /docker/conf.d/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+RUN mkdir -p /run/nginx
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+# expose ports
+EXPOSE 80
+
+# start supervisord with file custom config
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
