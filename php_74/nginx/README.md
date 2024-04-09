@@ -1,5 +1,5 @@
-## Dockerfile for PHP - NGINX - Centos7
+## Dockerfile for PHP - NGINX - Alpine
 
 PHP: 7.4
 Nginx
-OS: Centos7
+OS: Alpine 3.15
