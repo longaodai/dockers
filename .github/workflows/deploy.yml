@@ -1,0 +1,17 @@
+name: Deploy to FTP
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2.3.2
+
+      - name: Get IP
+        run: curl ifconfig.me/all.json
