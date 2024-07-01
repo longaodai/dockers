@@ -17,4 +17,4 @@ jobs:
         id: get_ip
         run: curl -s ifconfig.me
       - name: Echo IP
-        run: echo ${{steps.get_ip.outputs['ip_addr']}}
+        run: echo ${{steps.get_ip.outputs}}
