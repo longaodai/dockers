@@ -16,7 +16,7 @@ jobs:
       - name: Get IP
         id: get_ip
         run: |
-          ip_addr = (curl -s ifconfig.me)
-           echo "::set-output name=ip_addr::$ip_addr"
+            ip_addr = $(curl -s ifconfig.me)
+            echo "::set-output name=ip_addr::$ip_addr"
       - name: Echo IP
         run: echo ${{steps.get_ip.outputs.ip_addr}}
