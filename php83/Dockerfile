@@ -44,7 +44,9 @@ RUN apk add --no-cache \
   php83-xdebug \
   php83-pdo_sqlite \
   php83-bcmath \
-  php83-redis
+  php83-redis \
+  php83-simplexml \
+  php83-iconv
 
 # RUN apk add --no-cache \
 #   php83-common \
